@@ -1,7 +1,10 @@
-export interface IncomingMessage {
+
+export interface Coordinate{
+    x: string;
+    y: string;
+}
+
+export interface IncomingCoordinate {
     type: string;
-    payload: {
-        x: string;
-        y: string;
-    };  
+    payload: Coordinate;  
 }

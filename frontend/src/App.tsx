@@ -1,35 +1,73 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useRef, useState } from 'react';
 import './App.css'
+import { Coordinate, IncomingCoordinate } from './types';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = ()=> {
+  const [coordinate, setCoordinate] = useState<Coordinate[]>([]);
+  const [coordinateText, setCoordinateText] = useState<Coordinate>({
+    x: '0',
+    y: '0',
+  });
+  const ws = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    ws.current = new WebSocket('ws://localhost:8000/chat');
+    ws.current.onclose = () => console.log("ws closed");
+
+    ws.current.onmessage = event => {
+      const decodedCoordinate = JSON.parse(event.data) as IncomingCoordinate;
+
+      if (decodedCoordinate.type === 'SET_COORDINATES') {
+        setCoordinate((coordinate) => [...coordinate, decodedCoordinate.payload]);
+      }
+    };
+
+  }, []);
+  const changeCoordinate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCoordinateText((prev)=>({...prev, [e.target.name]: e.target.value,}));
+  };
+
+
+  const sendCoordinate = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!ws.current) return;
+    ws.current.send(JSON.stringify({
+      type: 'SET_COORDINATES',
+      payload: coordinateText,
+    }));
+    setCoordinateText({
+      x: '0',
+      y: '0',
+    })
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+        <div>
+          {coordinate.length > 0 && (
+            <canvas width={coordinate[coordinate.length -1].x} height={coordinate[coordinate.length-1].y} style={{border: '1px solid #000'}}></canvas>
+          )}
+        </div>
+        <div>
+      <form onSubmit={sendCoordinate}>
+        <input
+          type="number"
+          name="x"
+          value={coordinateText.x}
+          onChange={changeCoordinate}
+        />
+        <input
+          type="number"
+          name="y"
+          value={coordinateText.y}
+          onChange={changeCoordinate}
+        />
+        <input type="submit" value="Send" />
+      </form>
+    </div>
     </>
-  )
-}
+)
+};
 
-export default App
+export default App;
