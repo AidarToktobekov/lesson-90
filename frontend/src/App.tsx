@@ -44,28 +44,32 @@ const App = ()=> {
 
   return (
     <>
-        <div>
+      <div className="container">
+        <div className='canvas'>
           {coordinate.length > 0 && (
             <canvas width={coordinate[coordinate.length -1].x} height={coordinate[coordinate.length-1].y} style={{border: '1px solid #000'}}></canvas>
           )}
         </div>
-        <div>
-      <form onSubmit={sendCoordinate}>
-        <input
-          type="number"
-          name="x"
-          value={coordinateText.x}
-          onChange={changeCoordinate}
-        />
-        <input
-          type="number"
-          name="y"
-          value={coordinateText.y}
-          onChange={changeCoordinate}
-        />
-        <input type="submit" value="Send" />
-      </form>
-    </div>
+        <form onSubmit={sendCoordinate}>
+          <div className='form-container'>
+            <input
+              type="number"
+              name="x"
+              value={coordinateText.x}
+              onChange={changeCoordinate}
+              className='input-coordinate'
+              />
+            <input
+              type="number"
+              name="y"
+              value={coordinateText.y}
+              onChange={changeCoordinate}
+              className='input-coordinate'
+              />
+            <input type="submit" value="Send" className='form-button'/>
+          </div>
+        </form>
+      </div>
     </>
 )
 };
